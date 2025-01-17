@@ -49,6 +49,18 @@ DEFINE_DEVICE
 (***********************************************************)
 DEFINE_CONSTANT
 
+constant integer AUTO_TRACK_ON  = 301
+constant integer AUTO_TRACK_OFF = 302
+constant integer AUTO_TRACK_FB  = 331
+
+constant integer AUTO_TRACK_ANGLE_FULL  = 311
+constant integer AUTO_TRACK_ANGLE_UPPER = 312
+constant integer AUTO_TRACK_ANGLE_OFF   = 313
+
+constant integer AUTO_TRACK_ANGLE_FULL_FB  = 341
+constant integer AUTO_TRACK_ANGLE_UPPER_FB = 342
+constant integer AUTO_TRACK_ANGLE_OFF_FB   = 343
+
 
 (***********************************************************)
 (*              DATA TYPE DEFINITIONS GO BELOW             *)
@@ -60,7 +72,7 @@ DEFINE_TYPE
 (***********************************************************)
 DEFINE_VARIABLE
 
-volatile integer iPresetHeld
+volatile integer iPresetHeld = false
 
 (***********************************************************)
 (*               LATCHING DEFINITIONS GO BELOW             *)
@@ -84,85 +96,114 @@ DEFINE_MUTUALLY_EXCLUSIVE
 DEFINE_START {
 
 }
+
 (***********************************************************)
 (*                THE EVENTS GO BELOW                      *)
 (***********************************************************)
 DEFINE_EVENT
+
 button_event[dvTP, 0] {
     push: {
-    switch (button.input.channel) {
-        case TILT_UP:
-        case TILT_DN:
-        case PAN_LT:
-        case PAN_RT:
-        case ZOOM_IN:
-        case ZOOM_OUT:
-        case FOCUS_NEAR:
-        case FOCUS_FAR:
-        case AUTO_FOCUS: {
-        to[vdvObject, button.input.channel]
+        switch (button.input.channel) {
+            case TILT_UP:
+            case TILT_DN:
+            case PAN_LT:
+            case PAN_RT:
+            case ZOOM_IN:
+            case ZOOM_OUT:
+            case FOCUS_NEAR:
+            case FOCUS_FAR:
+            case AUTO_FOCUS: {
+                to[vdvObject, button.input.channel]
+            }
+            case AUTO_TRACK_ON: {
+                NAVCommand(vdvObject, "'AUTOTRACK-ON'")
+                NAVCommand(vdvObject, "'AUTOTRACK-START'")
+            }
+            case AUTO_TRACK_OFF: {
+                // NAVCommand(vdvObject, "'AUTOTRACK-STOP'")
+                NAVCommand(vdvObject, "'AUTOTRACK-OFF'")
+            }
+            case AUTO_TRACK_ANGLE_FULL: {
+                NAVCommand(vdvObject, "'AUTOTRACK_ANGLE-FULL'")
+            }
+            case AUTO_TRACK_ANGLE_UPPER: {
+                NAVCommand(vdvObject, "'AUTOTRACK_ANGLE-UPPER'")
+            }
+            case AUTO_TRACK_ANGLE_OFF: {
+                NAVCommand(vdvObject, "'AUTOTRACK_ANGLE-OFF'")
+            }
         }
-    }
     }
     hold[20]: {
-    switch (button.input.channel) {
-        case TILT_UP:
-        case TILT_DN:
-        case PAN_LT:
-        case PAN_RT:
-        case ZOOM_IN:
-        case ZOOM_OUT: {
-        //send_level vdvObject, TILT_SPEED_LVL, 30
-        //send_level vdvObject, PAN_SPEED_LVL, 30
-        //send_level vdvObject, ZOOM_SPEED_LVL, 15
+        switch (button.input.channel) {
+            case TILT_UP:
+            case TILT_DN:
+            case PAN_LT:
+            case PAN_RT:
+            case ZOOM_IN:
+            case ZOOM_OUT: {
+                // send_level vdvObject, TILT_SPEED_LVL, 30
+                // send_level vdvObject, PAN_SPEED_LVL, 30
+                // send_level vdvObject, ZOOM_SPEED_LVL, 15
+            }
+            case NAV_PRESET_1:
+            case NAV_PRESET_2:
+            case NAV_PRESET_3:
+            case NAV_PRESET_4:
+            case NAV_PRESET_5:
+            case NAV_PRESET_6:
+            case NAV_PRESET_7:
+            case NAV_PRESET_8: {
+                iPresetHeld = true
+                NAVBeepArray(dvTP)
+
+                NAVCommand(vdvObject,
+                            "'PRESETSAVE-', itoa(NAVFindInArrayINTEGER(NAV_PRESET,
+                                                                        button.input.channel))")
+            }
         }
-        case NAV_PRESET_1:
-        case NAV_PRESET_2:
-        case NAV_PRESET_3:
-        case NAV_PRESET_4:
-        case NAV_PRESET_5:
-        case NAV_PRESET_6:
-        case NAV_PRESET_7:
-        case NAV_PRESET_8: {
-        iPresetHeld = true
-        NAVBeepArray(dvTP)
-        NAVCommand(vdvObject, "'PRESETSAVE-', itoa(NAVFindInArrayINTEGER(NAV_PRESET, button.input.channel))")
-        }
-    }
     }
     release: {
-    switch (button.input.channel) {
-        case TILT_UP:
-        case TILT_DN:
-        case PAN_LT:
-        case PAN_RT:
-        case ZOOM_IN:
-        case ZOOM_OUT: {
-        //send_level vdvObject, TILT_SPEED_LVL, 20
-        //send_level vdvObject, PAN_SPEED_LVL, 20
-        //send_level vdvObject, ZOOM_SPEED_LVL, 10
-        }
-        case NAV_PRESET_1:
-        case NAV_PRESET_2:
-        case NAV_PRESET_3:
-        case NAV_PRESET_4:
-        case NAV_PRESET_5:
-        case NAV_PRESET_6:
-        case NAV_PRESET_7:
-        case NAV_PRESET_8: {
-        if (!iPresetHeld) {
-            NAVCommand(vdvObject, "'PRESET-', itoa(NAVFindInArrayINTEGER(NAV_PRESET, button.input.channel))")
-        }
+        switch (button.input.channel) {
+            case TILT_UP:
+            case TILT_DN:
+            case PAN_LT:
+            case PAN_RT:
+            case ZOOM_IN:
+            case ZOOM_OUT: {
+                // send_level vdvObject, TILT_SPEED_LVL, 20
+                // send_level vdvObject, PAN_SPEED_LVL, 20
+                // send_level vdvObject, ZOOM_SPEED_LVL, 10
+            }
+            case NAV_PRESET_1:
+            case NAV_PRESET_2:
+            case NAV_PRESET_3:
+            case NAV_PRESET_4:
+            case NAV_PRESET_5:
+            case NAV_PRESET_6:
+            case NAV_PRESET_7:
+            case NAV_PRESET_8: {
+                if (!iPresetHeld) {
+                    NAVCommand(vdvObject,
+                                "'PRESET-', itoa(NAVFindInArrayINTEGER(NAV_PRESET,
+                                                                        button.input.channel))")
+                }
 
-        iPresetHeld = false
+                iPresetHeld = false
+            }
         }
-    }
     }
 }
 
 
 timeline_event[TL_NAV_FEEDBACK] {
     [dvTP, AUTO_FOCUS] = ([vdvObject, AUTO_FOCUS_FB])
+    [dvTP, AUTO_TRACK_ON] = ([vdvObject, AUTO_TRACK_FB])
+    [dvTP, AUTO_TRACK_OFF] = (![vdvObject, AUTO_TRACK_FB])
+    [dvTP, AUTO_TRACK_ANGLE_FULL] = ([vdvObject, AUTO_TRACK_ANGLE_FULL_FB])
+    [dvTP, AUTO_TRACK_ANGLE_UPPER] = ([vdvObject, AUTO_TRACK_ANGLE_UPPER_FB])
+    [dvTP, AUTO_TRACK_ANGLE_OFF] = ([vdvObject, AUTO_TRACK_ANGLE_OFF_FB])
 }
 
 
@@ -170,4 +211,3 @@ timeline_event[TL_NAV_FEEDBACK] {
 (*                     END OF PROGRAM                      *)
 (*        DO NOT PUT ANY CODE BELOW THIS COMMENT           *)
 (***********************************************************)
-
