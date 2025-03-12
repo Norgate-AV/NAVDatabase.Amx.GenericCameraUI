@@ -72,7 +72,7 @@ DEFINE_TYPE
 (***********************************************************)
 DEFINE_VARIABLE
 
-volatile integer iPresetHeld = false
+volatile char iPresetHeld = false
 
 (***********************************************************)
 (*               LATCHING DEFINITIONS GO BELOW             *)
@@ -89,6 +89,16 @@ DEFINE_MUTUALLY_EXCLUSIVE
 (***********************************************************)
 (* EXAMPLE: DEFINE_FUNCTION <RETURN_TYPE> <NAME> (<PARAMETERS>) *)
 (* EXAMPLE: DEFINE_CALL '<NAME>' (<PARAMETERS>) *)
+
+define_function UpdateFeedback() {
+    [dvTP, AUTO_FOCUS] = ([vdvObject, AUTO_FOCUS_FB])
+    [dvTP, AUTO_TRACK_ON] = ([vdvObject, AUTO_TRACK_FB])
+    [dvTP, AUTO_TRACK_OFF] = (![vdvObject, AUTO_TRACK_FB])
+    [dvTP, AUTO_TRACK_ANGLE_FULL] = ([vdvObject, AUTO_TRACK_ANGLE_FULL_FB])
+    [dvTP, AUTO_TRACK_ANGLE_UPPER] = ([vdvObject, AUTO_TRACK_ANGLE_UPPER_FB])
+    [dvTP, AUTO_TRACK_ANGLE_OFF] = ([vdvObject, AUTO_TRACK_ANGLE_OFF_FB])
+}
+
 
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
@@ -197,13 +207,17 @@ button_event[dvTP, 0] {
 }
 
 
-timeline_event[TL_NAV_FEEDBACK] {
-    [dvTP, AUTO_FOCUS] = ([vdvObject, AUTO_FOCUS_FB])
-    [dvTP, AUTO_TRACK_ON] = ([vdvObject, AUTO_TRACK_FB])
-    [dvTP, AUTO_TRACK_OFF] = (![vdvObject, AUTO_TRACK_FB])
-    [dvTP, AUTO_TRACK_ANGLE_FULL] = ([vdvObject, AUTO_TRACK_ANGLE_FULL_FB])
-    [dvTP, AUTO_TRACK_ANGLE_UPPER] = ([vdvObject, AUTO_TRACK_ANGLE_UPPER_FB])
-    [dvTP, AUTO_TRACK_ANGLE_OFF] = ([vdvObject, AUTO_TRACK_ANGLE_OFF_FB])
+channel_event[vdvObject, AUTO_FOCUS_FB]
+channel_event[vdvObject, AUTO_TRACK_FB]
+channel_event[vdvObject, AUTO_TRACK_ANGLE_FULL_FB]
+channel_event[vdvObject, AUTO_TRACK_ANGLE_UPPER_FB]
+channel_event[vdvObject, AUTO_TRACK_ANGLE_OFF_FB] {
+    on: {
+        UpdateFeedback()
+    }
+    off: {
+        UpdateFeedback()
+    }
 }
 
 
