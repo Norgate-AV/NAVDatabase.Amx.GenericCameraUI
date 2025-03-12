@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0](https://github.com/Norgate-AV/NAVDatabase.Amx.GenericCameraUI/compare/v1.1.0...v1.2.0) (2025-03-12)
+
+### 🌟 Features
+
+- update to support NAVFoundation.Amx v2.0.0 ([958e450](https://github.com/Norgate-AV/NAVDatabase.Amx.GenericCameraUI/commit/958e450c80233fe544a047f917843df9d9a7ae7b))
+
 ## [1.1.0](https://github.com/Norgate-AV/NAVDatabase.Amx.GenericCameraUI/compare/v1.0.0...v1.1.0) (2025-02-17)
 
 ### 🌟 Features
